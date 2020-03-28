@@ -1,0 +1,96 @@
+% %--------重心有理插值改善龙格现象-------%%
+% t = -1:0.01:1
+% fun = inline('exp(-1./x.^2)');
+% % fun = inline('1./(1+25*x.^2)');
+% f = fun(t)
+% plot(t,f,'-.k','LineWidth',1)
+% xlim([-1.2 1.2])
+% ylim([-0.3 0.6])
+% % xlabel('x')
+% % ylabel('y')
+% hold on
+%
+% for d = 0:3
+% n=50
+% xx=linspace(-1,1,n)
+% y=fun(xx)
+% tt=-1:0.01:1
+% p=barycentricr(xx,y,d,tt)
+% subplot(2,2,d+1)
+% plot(tt,p,':.r','LineWidth',1)
+% title(['d=',num2str(d)],'FontSize',14)
+% end
+
+
+
+%%-------------测试拉格朗日插值和重心插值的舍入误差------%%
+%设置被插值函数
+% fun = inline('exp(x)');
+% m_b=[];
+% m_l=[];
+% %设置插值节点为切比雪夫点
+% for n=50:5:100
+% tt = linspace(0,pi,n+1)
+% zz = exp(1i*tt)
+% X = real(zz)
+% Y = fun(X)
+% t=-1:0.01:1
+%
+% ff=fun(t)
+%
+% w = (-1).^[0:n].*[1/2 ones(1,n-1) 1/2]
+% numer = ones(n+1,1)*t-X.'*ones(1,length(t))
+% local = sum(numer==0,1)
+% %当x=xk时，p(x)=yk
+% [r,c]= find(numer==0)
+% p(c)=Y(r)
+% item2 = find(local==0)
+% fac = 1./numer(:,item2)
+% p(item2) = (w.*Y*fac)./(w*fac)
+%
+%
+% w1 = prod(X.'*ones(1,n+1)-ones(n+1,1)*X+eye(n+1),2)
+% L=zeros(1,length(t))
+% for k = 1:length(t)
+%     for i = 1:n+1
+%         D = numer(:,k)
+%         D(i)=1
+%         L(k) = L(k) + Y(i)*prod(D)/w1(i)
+%     end
+% end
+% m_b = [m_b max(abs(p-ff))]
+% m_l = [m_l max(abs(L-ff))]
+% end
+% semilogy(50:5:100,m_b,'or')
+% hold on
+% semilogy(50:5:100,m_l,'*k')
+
+
+%%----------分段低次插值避免龙格现象----------------%%
+% t = -1:0.01:1
+% % fun = inline('1./(1+25*x.^2)');
+% fun = inline('exp(-1./x.^2)');
+% f = fun(t)
+% plot(t,f,'-.k','LineWidth',1)
+% hold on
+%
+% n=30
+% xx=linspace(-1,1,n+1)
+% k=floor((n+1)/3)
+% x1 = xx(1:k)
+% x2 = xx(k:end-k+1)
+% x3 = xx(end-k+1:end)
+% y1=fun(x1)
+% y2 = fun(x2)
+% y3 = fun(x3)
+% t1=-1:0.01:xx(k)
+% t2 = x2(1):0.01:x2(end)
+% t3 = x3(1):0.01:1
+% p1=barycentricp(x1,y1,t1)
+% p2=barycentricp(x2,y2,t2)
+% p3=barycentricp(x3,y3,t3)
+% plot(t1,p1,':.r','LineWidth',2)
+% hold on
+% plot(t2,p2,':.r','LineWidth',2)
+% hold on
+% plot(t3,p3,':.r','LineWidth',2)
